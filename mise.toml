@@ -1,0 +1,5 @@
+[env]
+
+[tools]
+go = { version = "1.26.1" }
+"go:golang.org/x/tools/gopls" = { version = "v0.21.1" }
