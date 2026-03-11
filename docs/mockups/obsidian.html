@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Obsidian — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       OBSIDIAN DESIGN SYSTEM
+       Dark · Utilitarian · Data-Dense
+    ═══════════════════════════════════════════ */
+
+    :root {
+      /* ── Surfaces ── */
+      --color-base:           #0c0e14;
+      --color-surface:        #12141c;
+      --color-surface-raised: #1a1d28;
+      --color-surface-overlay:#222534;
+      --color-surface-hover:  #272b3a;
+
+      /* ── Text ── */
+      --color-ink:            #e8eaf0;
+      --color-ink-secondary:  #a0a5b8;
+      --color-ink-muted:      #6b7084;
+      --color-ink-faint:      #464b5e;
+
+      /* ── Borders ── */
+      --color-border:         #272b3a;
+      --color-border-strong:  #363b50;
+
+      /* ── Accent: Emerald ── */
+      --color-accent:         #10b981;
+      --color-accent-hover:   #059669;
+      --color-accent-soft:    rgba(16,185,129,0.12);
+      --color-accent-text:    #34d399;
+
+      /* ── Semantic ── */
+      --color-success:        #10b981;
+      --color-success-soft:   rgba(16,185,129,0.12);
+      --color-success-text:   #34d399;
+
+      --color-warning:        #f59e0b;
+      --color-warning-soft:   rgba(245,158,11,0.12);
+      --color-warning-text:   #fbbf24;
+
+      --color-danger:         #ef4444;
+      --color-danger-soft:    rgba(239,68,68,0.12);
+      --color-danger-text:    #f87171;
+
+      --color-info:           #3b82f6;
+      --color-info-soft:      rgba(59,130,246,0.12);
+      --color-info-text:      #60a5fa;
+
+      /* ── Typography ── */
+      --font-display:   'Syne', sans-serif;
+      --font-body:      'IBM Plex Sans', -apple-system, sans-serif;
+      --font-mono:      'IBM Plex Mono', 'SF Mono', monospace;
+
+      --text-xs:    0.6875rem; /* 11px */
+      --text-sm:    0.75rem;   /* 12px */
+      --text-base:  0.8125rem; /* 13px */
+      --text-md:    0.875rem;  /* 14px */
+      --text-lg:    1rem;      /* 16px */
+      --text-xl:    1.25rem;   /* 20px */
+      --text-2xl:   1.625rem;  /* 26px */
+      --text-3xl:   2.25rem;   /* 36px */
+
+      --leading-tight:  1.2;
+      --leading-normal: 1.5;
+      --leading-loose:  1.7;
+
+      --tracking-tight:   -0.03em;
+      --tracking-normal:  0;
+      --tracking-wide:    0.06em;
+      --tracking-widest:  0.1em;
+
+      /* ── Spacing ── */
+      --space-0:  0;
+      --space-1:  0.25rem;
+      --space-2:  0.5rem;
+      --space-3:  0.75rem;
+      --space-4:  1rem;
+      --space-5:  1.25rem;
+      --space-6:  1.5rem;
+      --space-8:  2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+
+      /* ── Radii ── */
+      --radius-sm:   3px;
+      --radius-md:   6px;
+      --radius-lg:   8px;
+      --radius-xl:   12px;
+      --radius-full: 9999px;
+
+      /* ── Shadows ── */
+      --shadow-sm:  0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md:  0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg:  0 8px 24px rgba(0,0,0,0.5);
+      --shadow-xl:  0 16px 48px rgba(0,0,0,0.6);
+      --shadow-glow-accent: 0 0 20px rgba(16,185,129,0.15);
+
+      /* ── Transitions ── */
+      --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-fast:  100ms;
+      --duration-base:  180ms;
+      --duration-slow:  300ms;
+
+      /* ── Layout ── */
+      --sidebar-width: 220px;
+      --topbar-height: 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      color: var(--color-ink);
+      background: var(--color-base);
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT SHELL
+    ═══════════════════════════════════════════ */
+    .shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--topbar-height) 1fr;
+      grid-template-areas:
+        "sidebar topbar"
+        "sidebar main";
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 30;
+    }
+
+    .sidebar-brand {
+      padding: var(--space-3) var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+      height: var(--topbar-height);
+    }
+    .sidebar-brand-mark {
+      width: 24px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .sidebar-brand-mark svg { width: 14px; height: 14px; color: var(--color-base); }
+    .sidebar-brand-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: var(--text-md);
+      letter-spacing: var(--tracking-tight);
+      color: var(--color-ink);
+    }
+    .sidebar-brand-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: var(--tracking-widest);
+      text-transform: uppercase;
+      background: var(--color-accent-soft);
+      color: var(--color-accent-text);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      margin-left: auto;
+    }
+
+    .sidebar-nav { flex: 1; padding: var(--space-2); }
+
+    .sidebar-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-widest);
+      color: var(--color-ink-faint);
+      padding: var(--space-3) var(--space-2) var(--space-1);
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 6px var(--space-2);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-ink-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+      border: 1px solid transparent;
+    }
+    .sidebar-item:hover {
+      color: var(--color-ink);
+      background: var(--color-surface-hover);
+    }
+    .sidebar-item.active {
+      color: var(--color-accent-text);
+      background: var(--color-accent-soft);
+      border-color: rgba(16,185,129,0.08);
+    }
+    .sidebar-item svg { width: 15px; height: 15px; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-item.active svg { opacity: 1; color: var(--color-accent-text); }
+
+    .sidebar-item-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--color-ink-faint);
+      min-width: 18px;
+      text-align: right;
+    }
+    .sidebar-item.active .sidebar-item-count { color: var(--color-accent-text); }
+
+    .sidebar-footer {
+      padding: var(--space-2) var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--duration-fast);
+    }
+    .sidebar-user:hover { background: var(--color-surface-hover); }
+    .sidebar-user-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 6px var(--color-accent);
+      flex-shrink: 0;
+    }
+    .sidebar-user-name {
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-ink);
+    }
+    .sidebar-user-role {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-ink-faint);
+      margin-left: auto;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      grid-area: topbar;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-4);
+      gap: var(--space-3);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar-burger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--color-ink-secondary);
+      cursor: pointer;
+      padding: var(--space-1);
+    }
+    .topbar-burger svg { width: 18px; height: 18px; }
+
+    .topbar-crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-size: var(--text-sm);
+      color: var(--color-ink-muted);
+    }
+    .topbar-crumbs a {
+      color: var(--color-ink-muted);
+      text-decoration: none;
+      transition: color var(--duration-fast);
+    }
+    .topbar-crumbs a:hover { color: var(--color-accent-text); }
+    .topbar-crumbs .here { color: var(--color-ink); font-weight: 500; }
+    .topbar-crumbs .sep { opacity: 0.3; font-size: 10px; }
+
+    .topbar-search {
+      margin-left: auto;
+      position: relative;
+    }
+    .topbar-search-input {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      padding: 5px var(--space-8) 5px var(--space-8);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-base);
+      color: var(--color-ink);
+      outline: none;
+      width: 240px;
+      transition: all var(--duration-base) var(--ease-out);
+    }
+    .topbar-search-input::placeholder { color: var(--color-ink-faint); }
+    .topbar-search-input:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-glow-accent);
+      width: 320px;
+    }
+    .topbar-search-icon {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      color: var(--color-ink-faint);
+      pointer-events: none;
+    }
+    .topbar-search-hint {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+      color: var(--color-ink-faint);
+      pointer-events: none;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+    .topbar-btn {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: none;
+      background: none;
+      border-radius: var(--radius-md);
+      color: var(--color-ink-muted);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      position: relative;
+    }
+    .topbar-btn:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .topbar-btn svg { width: 16px; height: 16px; }
+    .topbar-btn .ping {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 6px; height: 6px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--color-accent);
+    }
+
+    /* ── Main ── */
+    .main-area {
+      grid-area: main;
+      padding: var(--space-5);
+      overflow-y: auto;
+    }
+
+    /* ── Mobile overlay ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 25;
+      opacity: 0;
+      transition: opacity var(--duration-base);
+    }
+    .sidebar-overlay.show { opacity: 1; }
+
+    /* ═══════════════════════════════════════════
+       PAGE HEADER
+    ═══════════════════════════════════════════ */
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-tight);
+    }
+    .page-head-sub {
+      font-size: var(--text-sm);
+      color: var(--color-ink-muted);
+      margin-top: 2px;
+    }
+    .page-head-actions {
+      display: flex;
+      gap: var(--space-2);
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      padding: 5px var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+      white-space: nowrap;
+      line-height: 1.5;
+      text-decoration: none;
+    }
+    .btn svg { width: 14px; height: 14px; }
+
+    .btn-accent {
+      background: var(--color-accent);
+      color: var(--color-base);
+      border-color: var(--color-accent);
+      font-weight: 700;
+    }
+    .btn-accent:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+      box-shadow: var(--shadow-glow-accent);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--color-ink-secondary);
+      border-color: var(--color-border-strong);
+    }
+    .btn-outline:hover {
+      border-color: var(--color-ink-faint);
+      color: var(--color-ink);
+      background: var(--color-surface-hover);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-ink-muted);
+      border-color: transparent;
+    }
+    .btn-ghost:hover {
+      color: var(--color-ink);
+      background: var(--color-surface-hover);
+    }
+
+    .btn-danger {
+      background: var(--color-danger-soft);
+      color: var(--color-danger-text);
+      border-color: rgba(239,68,68,0.15);
+    }
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.2);
+    }
+
+    .btn-sm { font-size: var(--text-xs); padding: 3px var(--space-2); }
+    .btn-lg { font-size: var(--text-md); padding: 8px var(--space-5); }
+    .btn-icon { width: 32px; height: 32px; padding: 0; }
+
+    /* ═══════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════ */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .card-pad { padding: var(--space-4); }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .card-title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-ink-secondary);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+    .card-foot {
+      padding: var(--space-2) var(--space-4);
+      border-top: 1px solid var(--color-border);
+      background: rgba(0,0,0,0.15);
+    }
+
+    /* ═══════════════════════════════════════════
+       METRIC CARDS
+    ═══════════════════════════════════════════ */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3);
+    }
+    .metric {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      position: relative;
+      overflow: hidden;
+      transition: border-color var(--duration-fast);
+    }
+    .metric:hover {
+      border-color: var(--color-border-strong);
+    }
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: var(--tracking-widest);
+      text-transform: uppercase;
+      color: var(--color-ink-faint);
+      margin-bottom: var(--space-2);
+    }
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      line-height: 1;
+      margin-bottom: var(--space-2);
+    }
+    .metric-delta {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .metric-delta.pos { color: var(--color-accent-text); }
+    .metric-delta.neg { color: var(--color-danger-text); }
+    .metric-delta svg { width: 12px; height: 12px; }
+    .metric-spark {
+      position: absolute;
+      right: var(--space-4);
+      bottom: var(--space-4);
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 32px;
+    }
+    .metric-spark-bar {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--color-accent-soft);
+      transition: height var(--duration-slow) var(--ease-out);
+    }
+    .metric:hover .metric-spark-bar { background: var(--color-accent); opacity: 0.5; }
+
+    /* ═══════════════════════════════════════════
+       BADGES
+    ═══════════════════════════════════════════ */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: var(--tracking-wide);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+    .tag-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+    .tag-neutral  { background: var(--color-surface-overlay); color: var(--color-ink-muted); }
+    .tag-neutral .tag-dot { background: var(--color-ink-muted); }
+    .tag-accent   { background: var(--color-accent-soft); color: var(--color-accent-text); }
+    .tag-accent .tag-dot { background: var(--color-accent); box-shadow: 0 0 4px var(--color-accent); }
+    .tag-success  { background: var(--color-success-soft); color: var(--color-success-text); }
+    .tag-success .tag-dot { background: var(--color-success); }
+    .tag-warning  { background: var(--color-warning-soft); color: var(--color-warning-text); }
+    .tag-warning .tag-dot { background: var(--color-warning); }
+    .tag-danger   { background: var(--color-danger-soft); color: var(--color-danger-text); }
+    .tag-danger .tag-dot { background: var(--color-danger); }
+
+    /* ═══════════════════════════════════════════
+       TABS
+    ═══════════════════════════════════════════ */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      padding: var(--space-3) var(--space-4);
+      color: var(--color-ink-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--color-ink); }
+    .tab-btn.active {
+      color: var(--color-accent-text);
+      border-bottom-color: var(--color-accent);
+    }
+    .tab-btn-ct {
+      font-size: 10px;
+      margin-left: 4px;
+      opacity: 0.5;
+    }
+    .tab-btn.active .tab-btn-ct { opacity: 1; }
+
+    /* ═══════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════ */
+    .tbl-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+    }
+    thead th {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-widest);
+      color: var(--color-ink-faint);
+      border-bottom: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+      color: var(--color-ink-secondary);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background var(--duration-fast); }
+    tbody tr:hover { background: var(--color-surface-hover); }
+
+    .tbl-check {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--color-accent);
+      cursor: pointer;
+    }
+
+    .tbl-user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .tbl-user-av {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .tbl-user-name { font-weight: 500; color: var(--color-ink); font-size: var(--text-sm); }
+    .tbl-user-email { font-size: var(--text-xs); color: var(--color-ink-muted); font-family: var(--font-mono); }
+
+    .tbl-mono { font-family: var(--font-mono); font-size: var(--text-xs); }
+    .tbl-actions {
+      display: flex;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity var(--duration-fast);
+    }
+    tbody tr:hover .tbl-actions { opacity: 1; }
+
+    /* ── Pagination ── */
+    .paging {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-2) var(--space-3);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-ink-faint);
+    }
+    .paging-btns {
+      display: flex;
+      gap: 2px;
+    }
+    .paging-b {
+      min-width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-ink-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      padding: 0 var(--space-1);
+    }
+    .paging-b:hover { border-color: var(--color-border-strong); color: var(--color-ink); }
+    .paging-b.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-base); font-weight: 700; }
+    .paging-b:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ═══════════════════════════════════════════
+       FORMS
+    ═══════════════════════════════════════════ */
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      color: var(--color-ink-muted);
+    }
+    .field-hint {
+      font-size: var(--text-xs);
+      color: var(--color-ink-faint);
+    }
+    .input {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      padding: 6px var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-base);
+      color: var(--color-ink);
+      outline: none;
+      transition: all var(--duration-fast);
+      line-height: var(--leading-normal);
+    }
+    .input::placeholder { color: var(--color-ink-faint); }
+    .input:hover { border-color: var(--color-border-strong); }
+    .input:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-glow-accent);
+    }
+    .input.err {
+      border-color: var(--color-danger);
+      box-shadow: 0 0 12px rgba(239,68,68,0.15);
+    }
+    .field-err {
+      font-size: var(--text-xs);
+      color: var(--color-danger-text);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .field-err svg { width: 12px; height: 12px; }
+
+    textarea.input { resize: vertical; min-height: 80px; }
+    select.input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7084' stroke-width='2' stroke-linecap='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: var(--space-8);
+    }
+
+    /* ── Toggle ── */
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-rail {
+      position: absolute;
+      inset: 0;
+      background: var(--color-border-strong);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background var(--duration-fast);
+    }
+    .toggle-rail::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: var(--color-ink-muted);
+      border-radius: 50%;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+    .toggle input:checked + .toggle-rail { background: var(--color-accent); }
+    .toggle input:checked + .toggle-rail::after {
+      transform: translateX(16px);
+      background: var(--color-base);
+    }
+
+    /* ── Checkbox / Radio ── */
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      cursor: pointer;
+    }
+    .check-row input { width: 15px; height: 15px; accent-color: var(--color-accent); cursor: pointer; }
+    .check-row span { font-size: var(--text-sm); color: var(--color-ink-secondary); }
+
+    /* ═══════════════════════════════════════════
+       ALERTS
+    ═══════════════════════════════════════════ */
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      border-left: 3px solid;
+    }
+    .notice svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+    .notice-title { font-weight: 600; margin-bottom: 2px; }
+    .notice-info    { background: var(--color-info-soft);    border-color: var(--color-info);    color: var(--color-info-text); }
+    .notice-success { background: var(--color-success-soft); border-color: var(--color-success); color: var(--color-success-text); }
+    .notice-warning { background: var(--color-warning-soft); border-color: var(--color-warning); color: var(--color-warning-text); }
+    .notice-danger  { background: var(--color-danger-soft);  border-color: var(--color-danger);  color: var(--color-danger-text); }
+
+    /* ═══════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════ */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-base);
+    }
+    .modal-bg.on { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-xl);
+      width: 90%;
+      max-width: 440px;
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.95) translateY(8px);
+      transition: transform var(--duration-slow) var(--ease-out);
+    }
+    .modal-bg.on .modal-box { transform: scale(1) translateY(0); }
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .modal-top-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; }
+    .modal-x {
+      width: 28px; height: 28px; border: none; background: none;
+      border-radius: var(--radius-sm); display: grid; place-items: center;
+      cursor: pointer; color: var(--color-ink-muted); transition: all var(--duration-fast);
+    }
+    .modal-x:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .modal-x svg { width: 16px; height: 16px; }
+    .modal-body { padding: var(--space-4); }
+    .modal-foot {
+      display: flex; justify-content: flex-end; gap: var(--space-2);
+      padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border);
+    }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    .toast-box {
+      position: fixed;
+      bottom: var(--space-4);
+      right: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      z-index: 60;
+      pointer-events: none;
+    }
+    .toast-msg {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-border-strong);
+      color: var(--color-ink);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      font-size: var(--text-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      pointer-events: auto;
+      animation: slideUp var(--duration-slow) var(--ease-out) both;
+      max-width: 340px;
+    }
+    .toast-msg svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .toast-ok svg { color: var(--color-accent-text); }
+    .toast-err svg { color: var(--color-danger-text); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       DROPDOWN
+    ═══════════════════════════════════════════ */
+    .dd-menu {
+      min-width: 180px;
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 3px;
+    }
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 5px var(--space-3);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      color: var(--color-ink-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--font-body);
+      transition: all var(--duration-fast);
+    }
+    .dd-item:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .dd-item svg { width: 14px; height: 14px; opacity: 0.5; }
+    .dd-item:hover svg { opacity: 1; }
+    .dd-item.red { color: var(--color-danger-text); }
+    .dd-item.red:hover { background: var(--color-danger-soft); }
+    .dd-sep { height: 1px; background: var(--color-border); margin: 3px 0; }
+
+    /* ═══════════════════════════════════════════
+       COMMAND PALETTE
+    ═══════════════════════════════════════════ */
+    .cmdk {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      max-width: 520px;
+      overflow: hidden;
+    }
+    .cmdk-search {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .cmdk-search svg { width: 16px; height: 16px; color: var(--color-ink-faint); flex-shrink: 0; }
+    .cmdk-search input {
+      border: none; outline: none;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: transparent;
+      color: var(--color-ink);
+      flex: 1;
+    }
+    .cmdk-search input::placeholder { color: var(--color-ink-faint); }
+    .cmdk-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-widest);
+      color: var(--color-ink-faint);
+      padding: var(--space-2) var(--space-4) 2px;
+    }
+    .cmdk-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 5px var(--space-4);
+      margin: 0 3px;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--color-ink-secondary);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+    .cmdk-row:hover, .cmdk-row.hl {
+      background: var(--color-accent-soft);
+      color: var(--color-accent-text);
+    }
+    .cmdk-row svg { width: 14px; height: 14px; opacity: 0.5; }
+    .cmdk-row:hover svg { opacity: 1; }
+    .cmdk-row-keys {
+      margin-left: auto;
+      display: flex;
+      gap: 3px;
+    }
+    .cmdk-row-keys kbd {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 1px 5px;
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+      background: var(--color-surface);
+      color: var(--color-ink-faint);
+    }
+    .cmdk-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-2) var(--space-4);
+      border-top: 1px solid var(--color-border);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--color-ink-faint);
+    }
+
+    /* ═══════════════════════════════════════════
+       PROGRESS BAR
+    ═══════════════════════════════════════════ */
+    .prog {
+      height: 4px;
+      background: var(--color-surface-overlay);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+      transition: width var(--duration-slow) var(--ease-out);
+    }
+    .prog-fill.warn { background: var(--color-warning); }
+    .prog-fill.bad  { background: var(--color-danger); }
+
+    /* ═══════════════════════════════════════════
+       CHART (CSS-only)
+    ═══════════════════════════════════════════ */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 140px;
+      padding-top: var(--space-3);
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bar-stick {
+      width: 100%;
+      max-width: 32px;
+      border-radius: 3px 3px 0 0;
+      background: var(--color-accent);
+      opacity: 0.35;
+      transition: opacity var(--duration-base), height var(--duration-slow) var(--ease-out);
+    }
+    .bar-col:hover .bar-stick { opacity: 0.85; }
+    .bar-lbl {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--color-ink-faint);
+    }
+
+    /* ═══════════════════════════════════════════
+       TOOLTIP (CSS-only)
+    ═══════════════════════════════════════════ */
+    .tip-wrap { position: relative; display: inline-flex; }
+    .tip-wrap .tip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(3px);
+      background: var(--color-surface-overlay);
+      border: 1px solid var(--color-border-strong);
+      color: var(--color-ink);
+      font-size: var(--text-xs);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: all var(--duration-fast);
+      box-shadow: var(--shadow-md);
+    }
+    .tip-wrap:hover .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ═══════════════════════════════════════════
+       AVATAR GROUP
+    ═══════════════════════════════════════════ */
+    .av-stack { display: flex; }
+    .av-stack .av {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--color-surface);
+      display: grid; place-items: center;
+      font-family: var(--font-mono);
+      font-size: 9px; font-weight: 600;
+      color: #fff; margin-left: -6px;
+      cursor: pointer;
+      transition: transform var(--duration-fast);
+    }
+    .av-stack .av:first-child { margin-left: 0; }
+    .av-stack .av:hover { transform: translateY(-2px); z-index: 2; }
+    .av-stack .av-rest {
+      background: var(--color-surface-overlay);
+      color: var(--color-ink-muted);
+      font-size: 9px;
+    }
+
+    /* ═══════════════════════════════════════════
+       SHOWCASE HELPERS
+    ═══════════════════════════════════════════ */
+    .ds-section { margin-bottom: var(--space-10); }
+    .ds-heading {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: 4px;
+    }
+    .ds-desc {
+      font-size: var(--text-sm);
+      color: var(--color-ink-muted);
+      margin-bottom: var(--space-5);
+    }
+    .ds-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+    .ds-inline { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+    .ds-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-3);
+    }
+    .ds-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--space-3);
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim { animation: fadeUp var(--duration-slow) var(--ease-out) both; }
+    .anim-d1 { animation-delay: 50ms; }
+    .anim-d2 { animation-delay: 100ms; }
+    .anim-d3 { animation-delay: 150ms; }
+    .anim-d4 { animation-delay: 200ms; }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .shell {
+        grid-template-columns: 1fr;
+        grid-template-areas: "topbar" "main";
+      }
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0;
+        transform: translateX(-100%);
+        transition: transform var(--duration-slow) var(--ease-out);
+        width: var(--sidebar-width);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .topbar-burger { display: grid; place-items: center; }
+      .main-area { padding: var(--space-4); }
+      .page-head { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 640px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .topbar-search { display: none; }
+      .page-head-actions { width: 100%; }
+      .page-head-actions .btn { flex: 1; }
+      .ds-grid-2, .ds-grid-4 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 400px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="sidebar-brand-name">Obsidian</span>
+        <span class="sidebar-brand-tag">v2.4</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-group-label">Core</div>
+        <a class="sidebar-item active" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Overview
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Metrics
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Live Feed
+        </a>
+
+        <div class="sidebar-group-label">Manage</div>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Users
+          <span class="sidebar-item-count">312</span>
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Resources
+          <span class="sidebar-item-count">48</span>
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Invoices
+          <span class="sidebar-item-count">7</span>
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Settings
+        </a>
+
+        <div class="sidebar-group-label">Infra</div>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          Servers
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Security
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-dot"></div>
+          <span class="sidebar-user-name">M. Chen</span>
+          <span class="sidebar-user-role">ops</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ OVERLAY ═══ -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleNav()"></div>
+
+    <!-- ═══ TOPBAR ═══ -->
+    <header class="topbar">
+      <button class="topbar-burger" onclick="toggleNav()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <nav class="topbar-crumbs">
+        <a href="#">core</a><span class="sep">›</span><span class="here">overview</span>
+      </nav>
+      <div class="topbar-search">
+        <svg class="topbar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="topbar-search-input" type="text" placeholder="search…">
+        <span class="topbar-search-hint">/</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="ping"></span>
+        </button>
+        <button class="topbar-btn" aria-label="Terminal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══ MAIN ═══ -->
+    <main class="main-area">
+
+      <!-- Page Head -->
+      <div class="page-head anim">
+        <div>
+          <h1>Overview</h1>
+          <p class="page-head-sub">System health and key metrics — last 30 days</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="btn btn-accent">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Entry
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ METRICS ═══ -->
+      <section class="ds-section">
+        <div class="metrics-grid">
+          <div class="metric anim anim-d1">
+            <div class="metric-label">Revenue (MRR)</div>
+            <div class="metric-value">$127.4k</div>
+            <span class="metric-delta pos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              +14.2%
+            </span>
+            <div class="metric-spark">
+              <div class="metric-spark-bar" style="height:40%;"></div>
+              <div class="metric-spark-bar" style="height:55%;"></div>
+              <div class="metric-spark-bar" style="height:38%;"></div>
+              <div class="metric-spark-bar" style="height:62%;"></div>
+              <div class="metric-spark-bar" style="height:70%;"></div>
+              <div class="metric-spark-bar" style="height:58%;"></div>
+              <div class="metric-spark-bar" style="height:90%;"></div>
+            </div>
+          </div>
+          <div class="metric anim anim-d2">
+            <div class="metric-label">Active Sessions</div>
+            <div class="metric-value">4,812</div>
+            <span class="metric-delta pos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              +6.8%
+            </span>
+            <div class="metric-spark">
+              <div class="metric-spark-bar" style="height:50%;"></div>
+              <div class="metric-spark-bar" style="height:45%;"></div>
+              <div class="metric-spark-bar" style="height:60%;"></div>
+              <div class="metric-spark-bar" style="height:52%;"></div>
+              <div class="metric-spark-bar" style="height:68%;"></div>
+              <div class="metric-spark-bar" style="height:72%;"></div>
+              <div class="metric-spark-bar" style="height:80%;"></div>
+            </div>
+          </div>
+          <div class="metric anim anim-d3">
+            <div class="metric-label">Error Rate</div>
+            <div class="metric-value">0.12%</div>
+            <span class="metric-delta neg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+              +0.03%
+            </span>
+            <div class="metric-spark">
+              <div class="metric-spark-bar" style="height:15%;"></div>
+              <div class="metric-spark-bar" style="height:12%;"></div>
+              <div class="metric-spark-bar" style="height:10%;"></div>
+              <div class="metric-spark-bar" style="height:18%;"></div>
+              <div class="metric-spark-bar" style="height:22%;"></div>
+              <div class="metric-spark-bar" style="height:25%;"></div>
+              <div class="metric-spark-bar" style="height:30%;"></div>
+            </div>
+          </div>
+          <div class="metric anim anim-d4">
+            <div class="metric-label">P95 Latency</div>
+            <div class="metric-value">142ms</div>
+            <span class="metric-delta pos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+              -18ms
+            </span>
+            <div class="metric-spark">
+              <div class="metric-spark-bar" style="height:70%;"></div>
+              <div class="metric-spark-bar" style="height:65%;"></div>
+              <div class="metric-spark-bar" style="height:58%;"></div>
+              <div class="metric-spark-bar" style="height:50%;"></div>
+              <div class="metric-spark-bar" style="height:45%;"></div>
+              <div class="metric-spark-bar" style="height:40%;"></div>
+              <div class="metric-spark-bar" style="height:35%;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ TABLE ═══ -->
+      <section class="ds-section">
+        <div class="card anim anim-d2">
+          <div class="card-head">
+            <div class="tab-bar" style="border-bottom:none;">
+              <button class="tab-btn active">All<span class="tab-btn-ct">312</span></button>
+              <button class="tab-btn">Active<span class="tab-btn-ct">246</span></button>
+              <button class="tab-btn">Suspended<span class="tab-btn-ct">18</span></button>
+              <button class="tab-btn">Invited<span class="tab-btn-ct">48</span></button>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-outline btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filter
+              </button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:32px;"><input type="checkbox" class="tbl-check"></th>
+                  <th>User</th>
+                  <th>Status</th>
+                  <th>Role</th>
+                  <th>API Calls</th>
+                  <th>Last Seen</th>
+                  <th style="width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" class="tbl-check"></td>
+                  <td>
+                    <div class="tbl-user">
+                      <div class="tbl-user-av" style="background:#6366f1;">KR</div>
+                      <div>
+                        <div class="tbl-user-name">Kira Rosetti</div>
+                        <div class="tbl-user-email">kira@acme.io</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-success"><span class="tag-dot"></span>online</span></td>
+                  <td class="tbl-mono">admin</td>
+                  <td class="tbl-mono">48.2k</td>
+                  <td class="tbl-mono" style="color:var(--color-ink-faint);">now</td>
+                  <td>
+                    <div class="tbl-actions">
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="tbl-check"></td>
+                  <td>
+                    <div class="tbl-user">
+                      <div class="tbl-user-av" style="background:#ec4899;">TN</div>
+                      <div>
+                        <div class="tbl-user-name">Tomás Navarro</div>
+                        <div class="tbl-user-email">tomas@acme.io</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-success"><span class="tag-dot"></span>online</span></td>
+                  <td class="tbl-mono">dev</td>
+                  <td class="tbl-mono">12.7k</td>
+                  <td class="tbl-mono" style="color:var(--color-ink-faint);">3m ago</td>
+                  <td>
+                    <div class="tbl-actions">
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="tbl-check"></td>
+                  <td>
+                    <div class="tbl-user">
+                      <div class="tbl-user-av" style="background:#f59e0b;">OW</div>
+                      <div>
+                        <div class="tbl-user-name">Odera Watts</div>
+                        <div class="tbl-user-email">odera@acme.io</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-warning"><span class="tag-dot"></span>idle</span></td>
+                  <td class="tbl-mono">viewer</td>
+                  <td class="tbl-mono">891</td>
+                  <td class="tbl-mono" style="color:var(--color-ink-faint);">2h ago</td>
+                  <td>
+                    <div class="tbl-actions">
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="tbl-check"></td>
+                  <td>
+                    <div class="tbl-user">
+                      <div class="tbl-user-av" style="background:#64748b;">LS</div>
+                      <div>
+                        <div class="tbl-user-name">Linh Sato</div>
+                        <div class="tbl-user-email">linh@acme.io</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-neutral"><span class="tag-dot"></span>offline</span></td>
+                  <td class="tbl-mono">dev</td>
+                  <td class="tbl-mono">6.3k</td>
+                  <td class="tbl-mono" style="color:var(--color-ink-faint);">5d ago</td>
+                  <td>
+                    <div class="tbl-actions">
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                      <button class="btn btn-ghost btn-icon btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-foot">
+            <div class="paging">
+              <span>1–4 of 312</span>
+              <div class="paging-btns">
+                <button class="paging-b" disabled>←</button>
+                <button class="paging-b on">1</button>
+                <button class="paging-b">2</button>
+                <button class="paging-b">3</button>
+                <button class="paging-b">…</button>
+                <button class="paging-b">78</button>
+                <button class="paging-b">→</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ BUTTONS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Buttons</h2>
+        <p class="ds-desc">Accent, outline, ghost, and danger variants at multiple sizes.</p>
+        <div class="card">
+          <div class="card-pad" style="display:flex; flex-direction:column; gap:var(--space-5);">
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">Variants</div>
+              <div class="ds-row">
+                <button class="btn btn-accent">Accent</button>
+                <button class="btn btn-outline">Outline</button>
+                <button class="btn btn-ghost">Ghost</button>
+                <button class="btn btn-danger">Danger</button>
+              </div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">Sizes</div>
+              <div class="ds-row">
+                <button class="btn btn-accent btn-sm">Small</button>
+                <button class="btn btn-accent">Default</button>
+                <button class="btn btn-accent btn-lg">Large</button>
+              </div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">With Icons</div>
+              <div class="ds-row">
+                <button class="btn btn-accent">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Deploy
+                </button>
+                <button class="btn btn-outline">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                  Run Task
+                </button>
+                <div class="tip-wrap">
+                  <button class="btn btn-outline btn-icon" aria-label="Refresh">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  </button>
+                  <span class="tip">Refresh data</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ TAGS / BADGES ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Tags & Indicators</h2>
+        <p class="ds-desc">Status tags, avatar stacks, and progress bars.</p>
+        <div class="card">
+          <div class="card-pad" style="display:flex; flex-direction:column; gap:var(--space-5);">
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">Status Tags</div>
+              <div class="ds-inline">
+                <span class="tag tag-neutral"><span class="tag-dot"></span>offline</span>
+                <span class="tag tag-accent"><span class="tag-dot"></span>deployed</span>
+                <span class="tag tag-success"><span class="tag-dot"></span>online</span>
+                <span class="tag tag-warning"><span class="tag-dot"></span>degraded</span>
+                <span class="tag tag-danger"><span class="tag-dot"></span>critical</span>
+              </div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">Avatar Stack</div>
+              <div class="av-stack">
+                <div class="av" style="background:#6366f1;">KR</div>
+                <div class="av" style="background:#ec4899;">TN</div>
+                <div class="av" style="background:#f59e0b;">OW</div>
+                <div class="av" style="background:#64748b;">LS</div>
+                <div class="av av-rest">+8</div>
+              </div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom:var(--space-2);">Progress</div>
+              <div style="display:flex; flex-direction:column; gap:var(--space-3); max-width:360px;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                    <span class="field-label" style="text-transform:none; letter-spacing:0;">Bandwidth</span>
+                    <span style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-ink-faint);">64%</span>
+                  </div>
+                  <div class="prog"><div class="prog-fill" style="width:64%;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                    <span class="field-label" style="text-transform:none; letter-spacing:0;">Storage</span>
+                    <span style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-ink-faint);">91%</span>
+                  </div>
+                  <div class="prog"><div class="prog-fill bad" style="width:91%;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                    <span class="field-label" style="text-transform:none; letter-spacing:0;">Deploy</span>
+                    <span style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-ink-faint);">100%</span>
+                  </div>
+                  <div class="prog"><div class="prog-fill" style="width:100%;"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ CHARTS + ACTIVITY ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Charts & Activity</h2>
+        <p class="ds-desc">Data visualization and timeline feed.</p>
+        <div class="ds-grid-2">
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Requests / Day</span>
+              <button class="btn btn-ghost btn-sm" style="font-family:var(--font-mono); font-size:10px;">30d</button>
+            </div>
+            <div class="card-pad">
+              <div class="bar-chart">
+                <div class="bar-col"><div class="bar-stick" style="height:50%;"></div><span class="bar-lbl">M</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:65%;"></div><span class="bar-lbl">T</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:45%;"></div><span class="bar-lbl">W</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:80%;"></div><span class="bar-lbl">T</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:72%;"></div><span class="bar-lbl">F</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:35%;"></div><span class="bar-lbl">S</span></div>
+                <div class="bar-col"><div class="bar-stick" style="height:92%; opacity:0.85;"></div><span class="bar-lbl" style="color:var(--color-accent-text);">S</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Recent Events</span>
+              <button class="btn btn-ghost btn-sm" style="font-family:var(--font-mono); font-size:10px;">view all →</button>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+              <div style="display:flex; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border);">
+                <div style="width:6px; height:6px; border-radius:50%; background:var(--color-accent); margin-top:6px; flex-shrink:0; box-shadow:0 0 6px var(--color-accent);"></div>
+                <div style="flex:1;">
+                  <div style="font-size:var(--text-sm); font-weight:500;">Deploy <code style="font-family:var(--font-mono); font-size:10px; background:var(--color-surface-overlay); padding:1px 5px; border-radius:3px;">v2.4.1</code> successful</div>
+                  <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:1px;">2 min ago · production</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border);">
+                <div style="width:6px; height:6px; border-radius:50%; background:var(--color-warning); margin-top:6px; flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:var(--text-sm); font-weight:500;">Rate limit triggered on <code style="font-family:var(--font-mono); font-size:10px; background:var(--color-surface-overlay); padding:1px 5px; border-radius:3px;">/api/v2/sync</code></div>
+                  <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:1px;">18 min ago · us-east-1</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border);">
+                <div style="width:6px; height:6px; border-radius:50%; background:var(--color-info); margin-top:6px; flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:var(--text-sm); font-weight:500;">SSL certificate renewed</div>
+                  <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:1px;">1h ago · *.acme.io</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:var(--space-3); padding:var(--space-3) var(--space-4);">
+                <div style="width:6px; height:6px; border-radius:50%; background:var(--color-danger); margin-top:6px; flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:var(--text-sm); font-weight:500;">Health check failed — <code style="font-family:var(--font-mono); font-size:10px; background:var(--color-surface-overlay); padding:1px 5px; border-radius:3px;">db-replica-3</code></div>
+                  <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:1px;">3h ago · eu-west-1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ALERTS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Notices</h2>
+        <p class="ds-desc">Contextual system alerts with left-border emphasis.</p>
+        <div style="display:flex; flex-direction:column; gap:var(--space-3); max-width:600px;">
+          <div class="notice notice-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div><div class="notice-title">Scheduled maintenance</div>Database migration in 4 hours. Expect brief downtime.</div>
+          </div>
+          <div class="notice notice-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div><div class="notice-title">Deploy complete</div>v2.4.1 is live on all production nodes.</div>
+          </div>
+          <div class="notice notice-warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><div class="notice-title">Storage threshold</div>Primary volume at 91% capacity. Scale up recommended.</div>
+          </div>
+          <div class="notice notice-danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div><div class="notice-title">Replica failure</div>db-replica-3 unresponsive. Failover to replica-4 active.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ FORMS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Form Controls</h2>
+        <p class="ds-desc">Inputs, selects, toggles, checkboxes, and validation states.</p>
+        <div class="ds-grid-2">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Text Inputs</span></div>
+            <div class="card-pad" style="display:flex; flex-direction:column; gap:var(--space-4);">
+              <div class="field">
+                <label class="field-label">Hostname</label>
+                <input class="input" type="text" placeholder="e.g. api.acme.io">
+              </div>
+              <div class="field">
+                <label class="field-label">API Key</label>
+                <input class="input" type="text" placeholder="sk_live_…" style="font-family:var(--font-mono);">
+              </div>
+              <div class="field">
+                <label class="field-label">Webhook URL (error)</label>
+                <input class="input err" type="url" value="not-a-url">
+                <span class="field-err">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Must be a valid HTTPS URL
+                </span>
+              </div>
+              <div class="field">
+                <label class="field-label">Notes</label>
+                <textarea class="input" placeholder="Additional context…" rows="3"></textarea>
+                <span class="field-hint">Supports Markdown.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title">Selection & Toggles</span></div>
+            <div class="card-pad" style="display:flex; flex-direction:column; gap:var(--space-5);">
+              <div class="field">
+                <label class="field-label">Region</label>
+                <select class="input">
+                  <option value="">Select region…</option>
+                  <option>us-east-1</option>
+                  <option>us-west-2</option>
+                  <option>eu-west-1</option>
+                  <option>ap-southeast-1</option>
+                </select>
+              </div>
+              <div>
+                <div class="field-label" style="margin-bottom:var(--space-3);">Features</div>
+                <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                      <div style="font-size:var(--text-sm); font-weight:500;">Auto-scaling</div>
+                      <div style="font-size:var(--text-xs); color:var(--color-ink-faint);">Scale pods on CPU threshold</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" checked><span class="toggle-rail"></span></label>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                      <div style="font-size:var(--text-sm); font-weight:500;">Debug logging</div>
+                      <div style="font-size:var(--text-xs); color:var(--color-ink-faint);">Verbose output to CloudWatch</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox"><span class="toggle-rail"></span></label>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                      <div style="font-size:var(--text-sm); font-weight:500;">Canary releases</div>
+                      <div style="font-size:var(--text-xs); color:var(--color-ink-faint);">Route 5% traffic to new version</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" checked><span class="toggle-rail"></span></label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="field-label" style="margin-bottom:var(--space-2);">Access</div>
+                <div style="display:flex; flex-direction:column; gap:var(--space-2);">
+                  <label class="check-row"><input type="checkbox" checked><span>Read metrics</span></label>
+                  <label class="check-row"><input type="checkbox" checked><span>Trigger deploys</span></label>
+                  <label class="check-row"><input type="checkbox"><span>Manage secrets</span></label>
+                </div>
+              </div>
+              <div>
+                <div class="field-label" style="margin-bottom:var(--space-2);">Tier</div>
+                <div style="display:flex; flex-direction:column; gap:var(--space-2);">
+                  <label class="check-row"><input type="radio" name="tier"><span>Starter — 2 vCPU / 4 GB</span></label>
+                  <label class="check-row"><input type="radio" name="tier" checked><span>Pro — 8 vCPU / 32 GB</span></label>
+                  <label class="check-row"><input type="radio" name="tier"><span>Scale — Custom</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ OVERLAYS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Overlays</h2>
+        <p class="ds-desc">Dropdown, command palette, modal, and toast.</p>
+        <div class="ds-grid-2">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Dropdown</span></div>
+            <div class="card-pad">
+              <div class="dd-menu" style="position:relative;">
+                <button class="dd-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit config
+                </button>
+                <button class="dd-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Clone
+                </button>
+                <button class="dd-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                  Open terminal
+                </button>
+                <div class="dd-sep"></div>
+                <button class="dd-item red">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Destroy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title">Command Palette</span></div>
+            <div class="card-pad">
+              <div class="cmdk">
+                <div class="cmdk-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" placeholder="Type a command…">
+                </div>
+                <div class="cmdk-group-label">Actions</div>
+                <div class="cmdk-row hl">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  Quick deploy
+                  <span class="cmdk-row-keys"><kbd>⌘</kbd><kbd>D</kbd></span>
+                </div>
+                <div class="cmdk-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  Search logs
+                  <span class="cmdk-row-keys"><kbd>⌘</kbd><kbd>L</kbd></span>
+                </div>
+                <div class="cmdk-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  Preferences
+                  <span class="cmdk-row-keys"><kbd>⌘</kbd><kbd>,</kbd></span>
+                </div>
+                <div class="cmdk-foot">
+                  <span>↑↓ navigate</span>
+                  <span>↵ select · esc close</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ MODAL (inline preview + interactive) ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Modal</h2>
+        <p class="ds-desc">Confirmation dialog. Click to test the overlay version.</p>
+        <button class="btn btn-accent" onclick="document.getElementById('modal').classList.add('on')">Open Modal</button>
+        <div style="margin-top:var(--space-4);">
+          <div class="card" style="max-width:440px;">
+            <div class="modal-top">
+              <h3 class="modal-top-title">Destroy Resource</h3>
+              <button class="modal-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body">
+              <p style="font-size:var(--text-sm); color:var(--color-ink-secondary);">This will permanently destroy <code style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-overlay); padding:1px 5px; border-radius:3px;">db-replica-3</code> and all associated snapshots. This action cannot be undone.</p>
+            </div>
+            <div class="modal-foot">
+              <button class="btn btn-outline">Cancel</button>
+              <button class="btn btn-danger">Destroy</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ TOASTS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Toast Notifications</h2>
+        <p class="ds-desc">Ephemeral messages anchored bottom-right.</p>
+        <div class="ds-row">
+          <button class="btn btn-accent" onclick="fireToast('ok')">Success Toast</button>
+          <button class="btn btn-danger" onclick="fireToast('err')">Error Toast</button>
+        </div>
+      </section>
+
+      <!-- ═══ TYPOGRAPHY ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Typography</h2>
+        <p class="ds-desc">Syne for display, IBM Plex Sans for body, IBM Plex Mono for code and labels.</p>
+        <div class="card">
+          <div class="card-pad" style="display:flex; flex-direction:column; gap:var(--space-5);">
+            <div>
+              <div style="font-family:var(--font-display); font-size:var(--text-3xl); font-weight:800; letter-spacing:var(--tracking-tight); line-height:var(--leading-tight);">System Overview</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">Syne · 36px · 800 weight · display</div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-display); font-size:var(--text-2xl); font-weight:700; letter-spacing:var(--tracking-tight);">Page Title</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">Syne · 26px · 700 weight · heading</div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-body); font-size:var(--text-md); font-weight:600;">Section heading in body font</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">IBM Plex Sans · 14px · 600 weight · section</div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-body); font-size:var(--text-base); color:var(--color-ink-secondary); line-height:var(--leading-loose);">Body text at 13px with comfortable line-height, optimized for data-dense interfaces where screen real estate is at a premium.</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">IBM Plex Sans · 13px · body</div>
+            </div>
+            <div>
+              <code style="font-family:var(--font-mono); font-size:var(--text-sm); background:var(--color-surface-overlay); padding:3px 8px; border-radius:var(--radius-sm); color:var(--color-accent-text);">kubectl get pods -n production</code>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">IBM Plex Mono · 12px · inline code</div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:var(--tracking-widest); text-transform:uppercase; color:var(--color-ink-faint);">Mono Label · Uppercase · Widest Tracking</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--color-ink-faint); margin-top:4px;">IBM Plex Mono · 10px · label treatment</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ COLOR TOKENS ═══ -->
+      <section class="ds-section anim">
+        <h2 class="ds-heading">Color Tokens</h2>
+        <p class="ds-desc">Override CSS variables to create theme variants.</p>
+        <div class="ds-grid-4" style="gap:var(--space-2);">
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-accent);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Accent</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-accent</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-success);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Success</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-success</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-warning);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Warning</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-warning</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-danger);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Danger</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-danger</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-surface);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Surface</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-surface</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-surface-raised);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Raised</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-surface-raised</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-ink); border-bottom:1px solid var(--color-border);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Ink</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-ink</div>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div style="height:40px; background:var(--color-base);"></div>
+            <div class="card-pad" style="padding:var(--space-2) var(--space-3);">
+              <div style="font-size:var(--text-xs); font-weight:600;">Base</div>
+              <div style="font-family:var(--font-mono); font-size:9px; color:var(--color-ink-faint);">--color-base</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ═══ LIVE MODAL ═══ -->
+  <div class="modal-bg" id="modal" onclick="if(event.target===this)this.classList.remove('on')">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3 class="modal-top-title">Destroy Resource</h3>
+        <button class="modal-x" onclick="document.getElementById('modal').classList.remove('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:var(--text-sm); color:var(--color-ink-secondary);">This will permanently destroy <code style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-overlay); padding:1px 5px; border-radius:3px;">db-replica-3</code> and all associated snapshots. This action cannot be undone.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('on')">Cancel</button>
+        <button class="btn btn-danger" onclick="document.getElementById('modal').classList.remove('on'); fireToast('ok')">Destroy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOAST CONTAINER ═══ -->
+  <div class="toast-box" id="toasts"></div>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    }
+
+    function fireToast(type) {
+      var c = document.getElementById('toasts');
+      var t = document.createElement('div');
+      t.className = 'toast-msg toast-' + type;
+      if (type === 'ok') {
+        t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Operation completed successfully';
+      } else {
+        t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Action failed. Check logs for details.';
+      }
+      c.appendChild(t);
+      setTimeout(function() {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(12px)';
+        t.style.transition = 'all 250ms ease';
+        setTimeout(function() { t.remove(); }, 250);
+      }, 3000);
+    }
+
+    document.querySelectorAll('.tab-bar').forEach(function(g) {
+      g.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.addEventListener('click', function() {
+          g.querySelectorAll('.tab-btn').forEach(function(x) { x.classList.remove('active'); });
+          b.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
