@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompter — Prompt Requests</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-ink:          #1e293b;
+      --color-ink-soft:     #475569;
+      --color-ink-muted:    #94a3b8;
+      --color-ink-faint:    #cbd5e1;
+
+      --color-bg:           #f1f5f9;
+      --color-surface:      #ffffff;
+      --color-surface-raised: #ffffff;
+      --color-surface-sunken: #f8fafc;
+      --color-surface-hover: #f8fafc;
+
+      --color-border:       #e2e8f0;
+      --color-border-strong:#cbd5e1;
+
+      --color-accent:       #066fd1;
+      --color-accent-hover: #0559a5;
+      --color-accent-soft:  rgba(6, 111, 209, 0.08);
+      --color-accent-text:  #066fd1;
+
+      --color-success:      #2fb344;
+      --color-success-soft: rgba(47, 179, 68, 0.1);
+      --color-success-text: #2fb344;
+      --color-warning:      #f59f00;
+      --color-warning-soft: rgba(245, 159, 0, 0.1);
+      --color-warning-text: #c98200;
+      --color-danger:       #d63939;
+      --color-danger-soft:  rgba(214, 57, 57, 0.1);
+      --color-danger-text:  #d63939;
+      --color-info:         #4299e1;
+      --color-info-soft:    rgba(66, 153, 225, 0.1);
+      --color-info-text:    #4299e1;
+
+      --font-body:    'Inter', -apple-system, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', 'SF Mono', monospace;
+
+      --text-xs: 0.75rem; --text-sm: 0.8125rem; --text-base: 0.875rem;
+      --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.25rem;
+      --text-2xl: 1.5rem; --text-3xl: 2rem;
+      --leading-tight: 1.2; --leading-normal: 1.5; --leading-loose: 1.75;
+
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+      --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+
+      --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px;
+      --radius-lg: 10px; --radius-xl: 12px; --radius-full: 9999px;
+
+      --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md:  0 4px 8px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.04);
+      --shadow-lg:  0 10px 20px -4px rgba(0,0,0,0.08), 0 4px 8px -4px rgba(0,0,0,0.04);
+      --shadow-xl:  0 20px 30px -6px rgba(0,0,0,0.1), 0 8px 12px -6px rgba(0,0,0,0.05);
+
+      --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 350ms;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+      --sidebar-w: 250px;
+      --topbar-h: 56px;
+      --sidebar-bg: #1e293b;
+      --sidebar-ink: #94a3b8;
+      --sidebar-ink-bright: #f1f5f9;
+      --sidebar-border: rgba(255,255,255,0.06);
+      --sidebar-active-bg: rgba(255,255,255,0.08);
+      --sidebar-hover-bg: rgba(255,255,255,0.05);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-ink);
+      background: var(--color-bg);
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* ═══ LAYOUT SHELL ═══ */
+    .shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      grid-template-rows: var(--topbar-h) 1fr;
+      grid-template-areas: "sidebar topbar" "sidebar main";
+      height: 100vh;
+    }
+
+    /* ── Dark Sidebar ── */
+    .sidebar {
+      grid-area: sidebar;
+      background: linear-gradient(180deg, #1e293b 0%, #172033 100%);
+      padding: var(--space-4) 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; z-index: 30;
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .sidebar-brand { padding: 0 var(--space-5) var(--space-6); display: flex; align-items: center; gap: var(--space-3); }
+    .sidebar-brand-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-md);
+      background: var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 14px;
+    }
+    .sidebar-brand-name { font-weight: 700; font-size: var(--text-lg); color: var(--sidebar-ink-bright); letter-spacing: -0.02em; }
+    .sidebar-brand-status {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent);
+      margin-left: 2px; flex-shrink: 0;
+    }
+    .sidebar-section { padding: var(--space-1) var(--space-3); }
+    .sidebar-section + .sidebar-section { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--sidebar-border); }
+    .sidebar-label { font-size: 0.6875rem; font-weight: 600; color: rgba(148,163,184,0.5); text-transform: uppercase; letter-spacing: 0.06em; padding: var(--space-2) var(--space-3) var(--space-2); }
+    .sidebar-link {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: 8px 12px; margin: 1px 0; border-radius: var(--radius-md);
+      font-size: var(--text-sm); font-weight: 400; color: var(--sidebar-ink);
+      text-decoration: none; transition: all var(--dur-fast);
+    }
+    .sidebar-link:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-ink-bright); }
+    .sidebar-link.active {
+      background: var(--sidebar-active-bg);
+      color: #fff; font-weight: 500;
+      border-left: 3px solid var(--color-accent);
+      padding-left: 9px;
+    }
+    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.75; }
+    .sidebar-badge {
+      margin-left: auto; background: var(--color-accent);
+      color: #fff; font-size: 0.6875rem; font-weight: 600; padding: 1px 7px; border-radius: var(--radius-full); min-width: 20px; text-align: center;
+    }
+    .sidebar-spacer { flex: 1; }
+    .sidebar-footer { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--sidebar-border); margin-top: var(--space-2); }
+    .sidebar-user-card {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-2);
+      border-radius: var(--radius-md); transition: background var(--dur-fast);
+      position: relative;
+    }
+    .sidebar-user-card:hover { background: var(--sidebar-hover-bg); }
+    .sidebar-user-avatar {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      background: var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: var(--text-xs);
+    }
+    .sidebar-user-info { flex: 1; min-width: 0; }
+    .sidebar-user-name { font-weight: 500; font-size: var(--text-sm); color: var(--sidebar-ink-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-role { font-size: var(--text-xs); color: var(--sidebar-ink); }
+    .status-indicator { position: absolute; bottom: 4px; left: 28px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-success); border: 2px solid var(--sidebar-bg); }
+
+    /* ── Topbar ── */
+    .topbar {
+      grid-area: topbar;
+      background: var(--color-surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 0 var(--space-6); display: flex; align-items: center; gap: var(--space-4); z-index: 20;
+    }
+    .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--color-ink-muted); }
+    .breadcrumbs a { color: var(--color-ink-muted); text-decoration: none; transition: color var(--dur-fast); }
+    .breadcrumbs a:hover { color: var(--color-accent); }
+    .breadcrumbs .current { color: var(--color-ink); font-weight: 500; }
+    .breadcrumbs .sep { opacity: .3; font-size: 10px; display: flex; align-items: center; }
+    .breadcrumbs .sep svg { width: 14px; height: 14px; }
+    .topbar-spacer { flex: 1; }
+    .topbar-search { position: relative; width: 240px; }
+    .topbar-search input {
+      width: 100%; padding: 7px 12px 7px 34px;
+      border: 1px solid transparent; border-radius: var(--radius-md);
+      background: var(--color-surface-sunken); font-family: var(--font-body);
+      font-size: var(--text-sm); color: var(--color-ink); transition: all var(--dur-base);
+    }
+    .topbar-search input::placeholder { color: var(--color-ink-muted); }
+    .topbar-search input:focus { outline: none; border-color: var(--color-accent); background: var(--color-surface); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+    .topbar-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-ink-muted); }
+    .topbar-search kbd { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-family: var(--font-mono); font-size: 0.6875rem; padding: 2px 6px; border-radius: var(--radius-xs); background: rgba(0,0,0,0.05); color: var(--color-ink-muted); line-height: 1.4; }
+    .topbar-actions { display: flex; align-items: center; gap: 2px; }
+    .topbar-btn { width: 32px; height: 32px; border-radius: var(--radius-md); border: none; background: transparent; color: var(--color-ink-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--dur-fast); position: relative; }
+    .topbar-btn:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .topbar-btn svg { width: 18px; height: 18px; stroke-width: 1.75; }
+    .topbar-avatar { width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--color-accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.6875rem; font-weight: 600; cursor: pointer; transition: all var(--dur-fast); }
+    .topbar-avatar:hover { opacity: .85; }
+    .topbar-divider { width: 1px; height: 24px; background: rgba(0,0,0,0.08); margin: 0 var(--space-2); }
+
+    /* ── Main ── */
+    .main-area { grid-area: main; overflow-y: auto; padding: var(--space-6) var(--space-8); }
+
+    /* ── Page Header ── */
+    .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: var(--space-5); }
+    .page-title { font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; line-height: var(--leading-tight); }
+    .page-subtitle { font-size: var(--text-sm); color: var(--color-ink-muted); margin-top: 4px; display: flex; align-items: center; gap: var(--space-2); }
+    .page-subtitle code {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      background: var(--color-surface-sunken); padding: 2px 8px;
+      border-radius: var(--radius-sm); color: var(--color-ink-soft);
+    }
+
+    /* ═══ BUTTONS ═══ */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-body); font-weight: 500; border: none; cursor: pointer; transition: all var(--dur-fast); white-space: nowrap; text-decoration: none; }
+    .btn-sm { padding: 5px 12px; font-size: var(--text-xs); border-radius: var(--radius-sm); }
+    .btn-md { padding: 7px 16px; font-size: var(--text-sm); border-radius: var(--radius-md); }
+    .btn-primary { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-secondary { background: var(--color-surface-sunken); color: var(--color-ink); border: 1px solid transparent; }
+    .btn-secondary:hover { background: var(--color-border); }
+    .btn-ghost { background: transparent; color: var(--color-ink-muted); }
+    .btn-ghost:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .btn svg { width: 15px; height: 15px; }
+
+    /* ═══ BADGES ═══ */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 500; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .badge-default  { background: rgba(148,163,184,0.12); color: var(--color-ink-soft); } .badge-default .badge-dot { background: var(--color-ink-muted); }
+    .badge-success  { background: var(--color-success-soft); color: var(--color-success-text); } .badge-success .badge-dot { background: var(--color-success); }
+    .badge-warning  { background: var(--color-warning-soft); color: var(--color-warning-text); } .badge-warning .badge-dot { background: var(--color-warning); }
+
+    /* ═══ DATA TABLE CARD ═══ */
+    .table-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .table-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .table-tabs { display: flex; gap: 0; }
+    .table-tab {
+      padding: 7px 14px; font-size: var(--text-sm); font-weight: 500;
+      color: var(--color-ink-muted); background: none; border: 1px solid transparent;
+      cursor: pointer; transition: all var(--dur-fast); border-radius: var(--radius-md);
+    }
+    .table-tab:hover { color: var(--color-ink); background: var(--color-surface-hover); }
+    .table-tab.active { color: var(--color-accent); background: var(--color-accent-soft); }
+    .table-tab .tab-count { font-size: 0.6875rem; opacity: .7; margin-left: 3px; }
+    .table-toolbar-right { display: flex; align-items: center; gap: var(--space-3); }
+    .table-search { position: relative; width: 200px; }
+    .table-search input {
+      width: 100%; padding: 7px 12px 7px 32px;
+      border: 1px solid transparent; border-radius: var(--radius-md);
+      background: var(--color-surface-sunken); font-family: var(--font-body);
+      font-size: var(--text-sm); color: var(--color-ink); transition: all var(--dur-base);
+    }
+    .table-search input::placeholder { color: var(--color-ink-muted); }
+    .table-search input:focus { outline: none; border-color: var(--color-accent); background: var(--color-surface); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+    .table-search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--color-ink-muted); }
+
+    /* Table as list — no thead, compact rows */
+    .list-table { width: 100%; border-collapse: collapse; }
+    .list-table td {
+      padding: 12px 20px; font-size: var(--text-sm);
+      border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle;
+    }
+    .list-table tr { transition: background var(--dur-fast); cursor: pointer; }
+    .list-table tr:hover { background: rgba(6,111,209,0.02); }
+    .list-table tr:last-child td { border-bottom: none; }
+    .list-table .col-main { width: 100%; }
+    .list-table .col-date { white-space: nowrap; text-align: right; }
+    .list-table .col-actions { white-space: nowrap; width: 1px; }
+
+    .cell-title { font-weight: 600; color: var(--color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cell-title.untitled { color: var(--color-ink-muted); font-style: italic; font-weight: 400; }
+    .cell-meta { display: flex; align-items: center; gap: var(--space-3); margin-top: 4px; }
+    .cell-meta-item { display: inline-flex; align-items: center; gap: 4px; color: var(--color-ink-muted); font-size: var(--text-xs); white-space: nowrap; }
+    .cell-meta-item svg { width: 13px; height: 13px; stroke-width: 1.75; flex-shrink: 0; }
+    .cell-date { font-size: var(--text-xs); color: var(--color-ink-muted); white-space: nowrap; }
+
+    /* Row Actions */
+    .row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity var(--dur-fast); }
+    .list-table tr:hover .row-actions { opacity: 1; }
+    .row-action-btn {
+      width: 28px; height: 28px; border-radius: var(--radius-md);
+      border: none; background: transparent; color: var(--color-ink-muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--dur-fast);
+    }
+    .row-action-btn:hover { color: var(--color-accent); background: var(--color-accent-soft); }
+    .row-action-btn svg { width: 13px; height: 13px; }
+
+    /* Pagination */
+    .table-pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .table-pagination span { font-size: var(--text-xs); color: var(--color-ink-muted); }
+
+    /* ═══ RESPONSIVE ═══ */
+    .mobile-toggle { display: none; background: none; border: none; color: var(--color-ink); cursor: pointer; padding: var(--space-1); border-radius: var(--radius-sm); }
+    .mobile-toggle:hover { background: var(--color-surface-hover); }
+    .mobile-toggle svg { width: 20px; height: 20px; }
+
+    @media (max-width: 1024px) {
+      .shell { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+      .sidebar { display: none; }
+      .mobile-toggle { display: flex; }
+      .cell-title { max-width: 300px; }
+    }
+    @media (max-width: 640px) {
+      .main-area { padding: var(--space-4); }
+      .table-toolbar { flex-direction: column; gap: var(--space-3); align-items: stretch; }
+      .table-toolbar-right { justify-content: stretch; }
+      .table-search { width: 100%; }
+      .row-actions { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">P</div>
+        <span class="sidebar-brand-name">Prompter</span>
+        <span class="sidebar-brand-status"></span>
+      </div>
+
+      <nav class="sidebar-section">
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Dashboard
+        </a>
+        <a href="#" class="sidebar-link active">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Prompt Requests
+          <span class="sidebar-badge">31</span>
+        </a>
+      </nav>
+
+      <nav class="sidebar-section">
+        <div class="sidebar-label">Repositories</div>
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          esnunes/prompter
+        </a>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+
+      <nav class="sidebar-section">
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Help
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-avatar">EN</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">Eduardo Nunes</div>
+            <div class="sidebar-user-role">Owner</div>
+          </div>
+          <div class="status-indicator"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Topbar ── -->
+    <header class="topbar">
+      <button class="mobile-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="breadcrumbs">
+        <a href="#">Repositories</a>
+        <span class="sep"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <a href="#">esnunes/prompter</a>
+        <span class="sep"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="current">Prompt Requests</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search...">
+        <kbd>/</kbd>
+      </div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" title="Notifications">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </button>
+      </div>
+      <div class="topbar-avatar">EN</div>
+    </header>
+
+    <!-- ── Main Content ── -->
+    <main class="main-area">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Prompt Requests</h1>
+          <p class="page-subtitle">
+            <code>github.com/esnunes/prompter</code>
+          </p>
+        </div>
+        <button class="btn btn-primary btn-md">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New prompt request
+        </button>
+      </div>
+
+      <!-- Prompt Requests Table -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-tabs">
+            <button class="table-tab active">Active<span class="tab-count"> 31</span></button>
+            <button class="table-tab">Draft<span class="tab-count"> 11</span></button>
+            <button class="table-tab">Published<span class="tab-count"> 20</span></button>
+            <button class="table-tab">Archived<span class="tab-count"> 0</span></button>
+          </div>
+          <div class="table-toolbar-right">
+            <div class="table-search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Filter requests...">
+            </div>
+          </div>
+        </div>
+        <table class="list-table">
+          <tbody>
+            <!-- DRAFT rows -->
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">I've explored the Prompter codebase and have a good understanding of the ar...</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 14</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 8, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title untitled">Untitled</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 0</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 8, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Limit AI to one question per conversation step</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 4</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 8, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement structured prompt-request label management</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 8</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 7, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Enhance conversation view with better message rendering</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 6</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 7, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add prompt-request status lifecycle with state transitions</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 10</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 7, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title untitled">Untitled</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 0</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 7, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title untitled">Untitled</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 0</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 6, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Create a new prompt request to test the feature</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 6, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title untitled">Untitled</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 0</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 6, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement prompt versioning with diff view</div>
+                <div class="cell-meta">
+                  <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 12</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 6, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <!-- PUBLISHED rows -->
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Visual refresh: Catppuccin Latte theme</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 10</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 9, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Auto-apply prompt-request label on new GitHub issues</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 8</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 8, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Archive and unarchive prompt requests</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 16</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 7, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement conversation-based prompt request workflow</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 14</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 6, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add GitHub webhook integration for prompt request events</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 6</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 5, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Support multi-provider LLM configuration</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 8</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 4, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement markdown rendering in prompt preview</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 4</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 3, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add template system for reusable prompt patterns</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 12</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 2, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement role-based access control for prompt requests</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 6</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Mar 1, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Build search and filtering for prompt request list</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 10</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 28, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add export functionality for prompt collections</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 4</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 26, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Integrate AI-assisted prompt improvement suggestions</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 8</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 24, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Set up CI/CD pipeline for prompt validation</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 6</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 22, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Create notification system for prompt review requests</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 10</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 21, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add analytics dashboard for prompt usage metrics</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 14</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 20, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Implement batch operations for prompt management</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 19, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Add real-time collaboration for prompt editing</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 8</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 1</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 18, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td class="col-main">
+                <div class="cell-title">Build prompt testing playground with variable inputs</div>
+                <div class="cell-meta">
+                  <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> 16</span>
+                  <span class="cell-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg> 2</span>
+                </div>
+              </td>
+              <td class="col-date"><span class="cell-date">Feb 17, 2026</span></td>
+              <td class="col-actions"><div class="row-actions"><button class="row-action-btn" title="View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="row-action-btn" title="More"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-pagination">
+          <span>Showing 1-31 of 31 results</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

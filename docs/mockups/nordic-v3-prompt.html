@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompter — Prompt Request</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-ink:          #1e293b;
+      --color-ink-soft:     #475569;
+      --color-ink-muted:    #94a3b8;
+      --color-ink-faint:    #cbd5e1;
+
+      --color-bg:           #f1f5f9;
+      --color-surface:      #ffffff;
+      --color-surface-raised: #ffffff;
+      --color-surface-sunken: #f8fafc;
+      --color-surface-hover: #f8fafc;
+
+      --color-border:       #e2e8f0;
+      --color-border-strong:#cbd5e1;
+
+      --color-accent:       #066fd1;
+      --color-accent-hover: #0559a5;
+      --color-accent-soft:  rgba(6, 111, 209, 0.08);
+      --color-accent-text:  #066fd1;
+
+      --color-success:      #2fb344;
+      --color-success-soft: rgba(47, 179, 68, 0.1);
+      --color-success-text: #2fb344;
+      --color-warning:      #f59f00;
+      --color-warning-soft: rgba(245, 159, 0, 0.1);
+      --color-warning-text: #c98200;
+      --color-danger:       #d63939;
+      --color-danger-soft:  rgba(214, 57, 57, 0.1);
+      --color-danger-text:  #d63939;
+      --color-info:         #4299e1;
+      --color-info-soft:    rgba(66, 153, 225, 0.1);
+      --color-info-text:    #4299e1;
+
+      --font-body:    'Inter', -apple-system, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', 'SF Mono', monospace;
+
+      --text-xs: 0.75rem; --text-sm: 0.8125rem; --text-base: 0.875rem;
+      --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.25rem;
+      --text-2xl: 1.5rem; --text-3xl: 2rem;
+      --leading-tight: 1.2; --leading-normal: 1.5; --leading-loose: 1.75;
+
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+      --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+
+      --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px;
+      --radius-lg: 10px; --radius-xl: 12px; --radius-full: 9999px;
+
+      --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md:  0 4px 8px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.04);
+      --shadow-lg:  0 10px 20px -4px rgba(0,0,0,0.08), 0 4px 8px -4px rgba(0,0,0,0.04);
+      --shadow-xl:  0 20px 30px -6px rgba(0,0,0,0.1), 0 8px 12px -6px rgba(0,0,0,0.05);
+
+      --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 350ms;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+      --sidebar-w: 250px;
+      --sidebar-collapsed-w: 60px;
+      --topbar-h: 56px;
+      --prompt-panel-w: 280px;
+      --right-panel-w: 260px;
+      --sidebar-bg: #1e293b;
+      --sidebar-ink: #94a3b8;
+      --sidebar-ink-bright: #f1f5f9;
+      --sidebar-border: rgba(255,255,255,0.06);
+      --sidebar-active-bg: rgba(255,255,255,0.08);
+      --sidebar-hover-bg: rgba(255,255,255,0.05);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-ink);
+      background: var(--color-bg);
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      overflow-x: hidden;
+    }
+
+    /* ═══ LAYOUT SHELL ═══ */
+    .shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) var(--prompt-panel-w) 1fr var(--right-panel-w);
+      grid-template-rows: var(--topbar-h) 1fr;
+      grid-template-areas: "sidebar prompt-panel topbar topbar" "sidebar prompt-panel main right";
+      height: 100vh;
+    }
+
+    /* ── Dark Sidebar ── */
+    .sidebar {
+      grid-area: sidebar;
+      background: linear-gradient(180deg, #1e293b 0%, #172033 100%);
+      padding: var(--space-4) 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; z-index: 30;
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .sidebar-brand { padding: 0 var(--space-5) var(--space-6); display: flex; align-items: center; gap: var(--space-3); }
+    .sidebar-brand-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-md);
+      background: var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 14px;
+    }
+    .sidebar-brand-name { font-weight: 700; font-size: var(--text-lg); color: var(--sidebar-ink-bright); letter-spacing: -0.02em; }
+    .sidebar-brand-status {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent);
+      margin-left: 2px; flex-shrink: 0;
+    }
+    .sidebar-section { padding: var(--space-1) var(--space-3); }
+    .sidebar-section + .sidebar-section { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--sidebar-border); }
+    .sidebar-label { font-size: 0.6875rem; font-weight: 600; color: rgba(148,163,184,0.5); text-transform: uppercase; letter-spacing: 0.06em; padding: var(--space-2) var(--space-3) var(--space-2); }
+    .sidebar-link {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: 8px 12px; margin: 1px 0; border-radius: var(--radius-md);
+      font-size: var(--text-sm); font-weight: 400; color: var(--sidebar-ink);
+      text-decoration: none; transition: all var(--dur-fast);
+    }
+    .sidebar-link:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-ink-bright); }
+    .sidebar-link.active {
+      background: var(--sidebar-active-bg);
+      color: #fff; font-weight: 500;
+      border-left: 3px solid var(--color-accent);
+      padding-left: 9px;
+    }
+    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.75; }
+    .sidebar-badge {
+      margin-left: auto; background: var(--color-accent);
+      color: #fff; font-size: 0.6875rem; font-weight: 600; padding: 1px 7px; border-radius: var(--radius-full); min-width: 20px; text-align: center;
+    }
+    .sidebar-toggle-wrap { padding: var(--space-2) var(--space-3); }
+    .sidebar-toggle-btn {
+      width: 100%; padding: 6px; border-radius: var(--radius-md);
+      border: none; background: transparent; color: var(--sidebar-ink);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--dur-fast);
+    }
+    .sidebar-toggle-btn:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-ink-bright); }
+    .sidebar-toggle-btn svg { width: 16px; height: 16px; stroke-width: 1.75; }
+
+    /* Hidden checkboxes for CSS-only collapse toggles */
+    #sidebar-collapse, #prompt-panel-collapse { display: none; }
+    .sidebar, .shell { transition: all var(--dur-slow) var(--ease-out); }
+    .sidebar-brand, .sidebar-section, .sidebar-footer, .sidebar-toggle-wrap { transition: all var(--dur-slow) var(--ease-out); }
+
+    /* ── Sidebar collapsed state ── */
+    #sidebar-collapse:checked ~ .shell {
+      grid-template-columns: var(--sidebar-collapsed-w) var(--prompt-panel-w) 1fr var(--right-panel-w);
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar {
+      overflow: visible;
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-brand {
+      padding: 0 0 var(--space-5); justify-content: center;
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-brand-name,
+    #sidebar-collapse:checked ~ .shell .sidebar-brand-status { display: none; }
+    #sidebar-collapse:checked ~ .shell .sidebar-section {
+      padding: var(--space-1) var(--space-2);
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-label { display: none; }
+    #sidebar-collapse:checked ~ .shell .sidebar-link {
+      justify-content: center; padding: 10px; gap: 0;
+      border-left: none; padding-left: 10px;
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-link.active {
+      border-left: none; padding-left: 10px;
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-link span:not(.sidebar-badge),
+    #sidebar-collapse:checked ~ .shell .sidebar-badge { display: none; }
+    /* Hide text nodes in links — use font-size trick */
+    #sidebar-collapse:checked ~ .shell .sidebar-link {
+      font-size: 0; /* hides text nodes */
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-link svg {
+      width: 20px; height: 20px; /* keep icons visible */
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-footer {
+      padding: var(--space-2);
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-user-card {
+      justify-content: center; padding: var(--space-2);
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-user-info,
+    #sidebar-collapse:checked ~ .shell .status-indicator { display: none; }
+    #sidebar-collapse:checked ~ .shell .sidebar-toggle-wrap {
+      padding: var(--space-2);
+    }
+    #sidebar-collapse:checked ~ .shell .sidebar-toggle-btn svg {
+      transform: rotate(180deg);
+    }
+
+    /* ── Prompt Panel toggle in topbar ── */
+    .prompt-panel-toggle {
+      display: none; /* hidden when panel is open */
+      width: 32px; height: 32px; border-radius: var(--radius-md);
+      background: transparent; color: var(--color-ink-muted);
+      cursor: pointer; align-items: center; justify-content: center;
+      transition: all var(--dur-fast); flex-shrink: 0;
+    }
+    .prompt-panel-toggle:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .prompt-panel-toggle svg { width: 18px; height: 18px; }
+
+    /* ── Prompt Panel collapsed state ── */
+    #prompt-panel-collapse:checked ~ .shell {
+      grid-template-columns: var(--sidebar-w) 0px 1fr var(--right-panel-w);
+    }
+    #prompt-panel-collapse:checked ~ .shell .prompt-panel {
+      width: 0; min-width: 0; overflow: hidden; border-right: none; padding: 0;
+      opacity: 0; pointer-events: none;
+    }
+    #prompt-panel-collapse:checked ~ .shell .prompt-panel * {
+      visibility: hidden;
+    }
+    /* Show the topbar toggle when panel is collapsed */
+    #prompt-panel-collapse:checked ~ .shell .prompt-panel-toggle {
+      display: flex;
+    }
+    /* Both sidebar + prompt panel collapsed */
+    #sidebar-collapse:checked ~ #prompt-panel-collapse:checked ~ .shell {
+      grid-template-columns: var(--sidebar-collapsed-w) 0px 1fr var(--right-panel-w);
+    }
+
+    /* ── Prompt Panel (secondary sidebar) ── */
+    .prompt-panel {
+      grid-area: prompt-panel;
+      background: var(--color-surface);
+      border-right: 1px solid rgba(0,0,0,0.06);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .prompt-panel-header {
+      padding: var(--space-4) var(--space-4) var(--space-3);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .prompt-panel-title {
+      font-size: var(--text-sm); font-weight: 600; color: var(--color-ink);
+      letter-spacing: -0.01em;
+    }
+    .prompt-panel-close {
+      width: 26px; height: 26px; border-radius: var(--radius-sm);
+      border: none; background: transparent; color: var(--color-ink-muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--dur-fast);
+    }
+    .prompt-panel-close:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .prompt-panel-close svg { width: 14px; height: 14px; }
+    .prompt-panel-search {
+      padding: 0 var(--space-4) var(--space-3); flex-shrink: 0;
+    }
+    .prompt-panel-search input {
+      width: 100%; padding: 7px 12px;
+      border: 1px solid transparent; border-radius: var(--radius-md);
+      background: var(--color-surface-sunken); font-family: var(--font-body);
+      font-size: var(--text-xs); color: var(--color-ink); transition: all var(--dur-base);
+    }
+    .prompt-panel-search input::placeholder { color: var(--color-ink-muted); }
+    .prompt-panel-search input:focus { outline: none; border-color: var(--color-accent); background: var(--color-surface); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+    .prompt-list-scroll { flex: 1; overflow-y: auto; padding: 0 var(--space-2); }
+    .prompt-list-scroll::-webkit-scrollbar { width: 4px; }
+    .prompt-list-scroll::-webkit-scrollbar-track { background: transparent; }
+    .prompt-list-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 4px; }
+    .prompt-list { list-style: none; }
+    .prompt-item {
+      display: block; padding: 10px 12px; margin: 1px 0;
+      border-radius: var(--radius-md); text-decoration: none;
+      transition: all var(--dur-fast); cursor: pointer;
+    }
+    .prompt-item:hover { background: var(--color-surface-hover); }
+    .prompt-item.active { background: var(--color-accent-soft); }
+    .prompt-item-title {
+      font-size: var(--text-sm); color: var(--color-ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-weight: 400; line-height: 1.3;
+    }
+    .prompt-item.active .prompt-item-title { font-weight: 500; color: var(--color-accent); }
+    .prompt-item-meta {
+      display: flex; align-items: center; gap: var(--space-2);
+      margin-top: 3px;
+    }
+    .prompt-item-meta .badge { font-size: 0.625rem; padding: 1px 6px; }
+    .prompt-item-date { font-size: 0.6875rem; color: var(--color-ink-muted); }
+
+    .sidebar-spacer { flex: 1; }
+    .sidebar-footer { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--sidebar-border); margin-top: var(--space-2); }
+    .sidebar-user-card {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-2);
+      border-radius: var(--radius-md); transition: background var(--dur-fast);
+      position: relative;
+    }
+    .sidebar-user-card:hover { background: var(--sidebar-hover-bg); }
+    .sidebar-user-avatar {
+      width: 32px; height: 32px; border-radius: var(--radius-full);
+      background: var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: var(--text-xs);
+    }
+    .sidebar-user-info { flex: 1; min-width: 0; }
+    .sidebar-user-name { font-weight: 500; font-size: var(--text-sm); color: var(--sidebar-ink-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-role { font-size: var(--text-xs); color: var(--sidebar-ink); }
+    .status-indicator { position: absolute; bottom: 4px; left: 28px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-success); border: 2px solid var(--sidebar-bg); }
+
+    /* ── Topbar ── */
+    .topbar {
+      grid-area: topbar;
+      background: var(--color-surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 0 var(--space-6); display: flex; align-items: center; gap: var(--space-4); z-index: 20;
+      min-width: 0;
+    }
+    .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--color-ink-muted); min-width: 0; }
+    .breadcrumbs a { color: var(--color-ink-muted); text-decoration: none; transition: color var(--dur-fast); white-space: nowrap; }
+    .breadcrumbs a:hover { color: var(--color-accent); }
+    .breadcrumbs .current { color: var(--color-ink); font-weight: 500; white-space: nowrap; }
+    .breadcrumbs .sep { opacity: .3; font-size: 10px; display: flex; align-items: center; }
+    .breadcrumbs .sep svg { width: 14px; height: 14px; }
+    .topbar-spacer { flex: 1; }
+    .topbar-actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+    .topbar-btn { width: 32px; height: 32px; border-radius: var(--radius-md); border: none; background: transparent; color: var(--color-ink-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--dur-fast); position: relative; }
+    .topbar-btn:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .topbar-btn svg { width: 18px; height: 18px; stroke-width: 1.75; }
+    .topbar-avatar { width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--color-accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.6875rem; font-weight: 600; cursor: pointer; transition: all var(--dur-fast); }
+    .topbar-avatar:hover { opacity: .85; }
+    .topbar-divider { width: 1px; height: 24px; background: rgba(0,0,0,0.08); margin: 0 var(--space-2); }
+
+    /* ═══ BUTTONS ═══ */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-body); font-weight: 500; border: none; cursor: pointer; transition: all var(--dur-fast); white-space: nowrap; text-decoration: none; }
+    .btn-sm { padding: 5px 12px; font-size: var(--text-xs); border-radius: var(--radius-sm); }
+    .btn-md { padding: 7px 16px; font-size: var(--text-sm); border-radius: var(--radius-md); }
+    .btn-primary { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-secondary { background: var(--color-surface); color: var(--color-ink); border: 1px solid var(--color-border); }
+    .btn-secondary:hover { background: var(--color-surface-sunken); border-color: var(--color-border-strong); }
+    .btn-ghost { background: transparent; color: var(--color-ink-muted); }
+    .btn-ghost:hover { background: var(--color-surface-hover); color: var(--color-ink); }
+    .btn svg { width: 15px; height: 15px; }
+
+    /* ═══ BADGES ═══ */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 500; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .badge-default  { background: rgba(148,163,184,0.12); color: var(--color-ink-soft); } .badge-default .badge-dot { background: var(--color-ink-muted); }
+    .badge-success  { background: var(--color-success-soft); color: var(--color-success-text); } .badge-success .badge-dot { background: var(--color-success); }
+    .badge-warning  { background: var(--color-warning-soft); color: var(--color-warning-text); } .badge-warning .badge-dot { background: var(--color-warning); }
+
+    /* ═══ MAIN CHAT AREA ═══ */
+    .main-area {
+      grid-area: main;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      min-width: 0; /* prevent grid blowout */
+      background: var(--color-surface);
+    }
+
+    .chat-scroll {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: var(--space-6) var(--space-8);
+      display: flex; flex-direction: column; gap: var(--space-5);
+    }
+    .chat-scroll::-webkit-scrollbar { width: 6px; }
+    .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 3px; }
+    .chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.14); }
+
+    /* ── User Message ── */
+    .msg-user {
+      align-self: flex-end;
+      max-width: 70%;
+      background: var(--color-accent);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 18px 18px 4px 18px;
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      overflow-wrap: break-word; word-break: break-word;
+    }
+
+    /* ── AI Message ── */
+    .msg-ai {
+      align-self: flex-start;
+      max-width: 75%;
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      font-size: var(--text-base);
+      line-height: var(--leading-loose);
+      color: var(--color-ink);
+      overflow-wrap: break-word; word-break: break-word;
+    }
+    .msg-ai p + p { margin-top: 12px; }
+
+    /* ── Form Question Card ── */
+    .msg-question {
+      align-self: flex-start;
+      max-width: 75%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .question-label {
+      display: inline-block;
+      font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-accent-text);
+      background: var(--color-accent-soft);
+      padding: 2px 8px; border-radius: var(--radius-sm);
+      margin-bottom: var(--space-3);
+    }
+    .question-title {
+      font-size: var(--text-lg); font-weight: 600;
+      color: var(--color-ink); margin-bottom: var(--space-4);
+      line-height: var(--leading-tight);
+    }
+    .question-options { display: flex; flex-direction: column; gap: var(--space-2); }
+    .question-option {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: 12px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      cursor: pointer; transition: all var(--dur-fast);
+    }
+    .question-option:hover { border-color: var(--color-accent); background: var(--color-accent-soft); }
+    .question-option.selected { border-color: var(--color-accent); background: var(--color-accent-soft); }
+    .option-radio, .option-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--color-border-strong);
+      flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--dur-fast);
+    }
+    .option-check { border-radius: var(--radius-xs); }
+    .question-option.selected .option-radio,
+    .question-option.selected .option-check {
+      border-color: var(--color-accent); background: var(--color-accent);
+    }
+    .question-option.selected .option-radio::after {
+      content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+    }
+    .question-option.selected .option-check::after {
+      content: '';
+      width: 10px; height: 10px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+    .option-content { flex: 1; min-width: 0; }
+    .option-label { font-size: var(--text-sm); font-weight: 500; color: var(--color-ink); }
+    .option-desc { font-size: var(--text-xs); color: var(--color-ink-muted); margin-top: 2px; }
+    .question-actions { margin-top: var(--space-4); display: flex; gap: var(--space-2); }
+
+    /* ── Published Divider ── */
+    .msg-divider {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-2) 0;
+    }
+    .msg-divider::before, .msg-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--color-border);
+    }
+    .msg-divider span {
+      font-size: var(--text-xs); color: var(--color-ink-muted);
+      white-space: nowrap;
+    }
+
+    /* ── Thinking indicator ── */
+    .msg-thinking {
+      align-self: flex-start;
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: 10px 16px;
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm); color: var(--color-ink-muted);
+    }
+    .thinking-dots { display: flex; gap: 3px; }
+    .thinking-dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--color-ink-muted);
+      animation: thinking 1.4s infinite;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes thinking {
+      0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Chat Input ── */
+    .chat-input-bar {
+      padding: var(--space-4) var(--space-8) var(--space-5);
+      border-top: 1px solid rgba(0,0,0,0.05);
+      background: var(--color-surface);
+    }
+    .chat-input-wrap {
+      display: flex; align-items: flex-end; gap: var(--space-3);
+      background: var(--color-surface-sunken);
+      border: 1px solid transparent;
+      border-radius: var(--radius-xl);
+      padding: 4px 4px 4px 16px;
+      transition: all var(--dur-base);
+    }
+    .chat-input-wrap:focus-within {
+      border-color: var(--color-accent);
+      background: var(--color-surface);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+    .chat-input-wrap textarea {
+      flex: 1; border: none; background: transparent;
+      font-family: var(--font-body); font-size: var(--text-base);
+      color: var(--color-ink); resize: none; outline: none;
+      padding: 8px 0; line-height: var(--leading-normal);
+      min-height: 24px; max-height: 120px;
+    }
+    .chat-input-wrap textarea::placeholder { color: var(--color-ink-muted); }
+    .chat-send-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-lg);
+      background: var(--color-accent); border: none; color: #fff;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--dur-fast); flex-shrink: 0;
+    }
+    .chat-send-btn:hover { background: var(--color-accent-hover); }
+    .chat-send-btn svg { width: 16px; height: 16px; }
+    .chat-hint { font-size: var(--text-xs); color: var(--color-ink-muted); margin-top: var(--space-2); text-align: center; }
+
+    /* ═══ RIGHT PANEL ═══ */
+    .right-panel {
+      grid-area: right;
+      background: var(--color-surface);
+      border-left: 1px solid rgba(0,0,0,0.06);
+      padding: var(--space-6) var(--space-5);
+      display: flex; flex-direction: column; gap: var(--space-5);
+      overflow-y: auto;
+    }
+    .right-panel::-webkit-scrollbar { width: 4px; }
+    .right-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+    .panel-header { margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .panel-title {
+      font-size: var(--text-base); font-weight: 600; color: var(--color-ink);
+      line-height: var(--leading-tight);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .panel-title-meta {
+      display: flex; align-items: center; gap: var(--space-2);
+      margin-top: var(--space-2);
+    }
+    .panel-title-meta .meta-sep {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: var(--color-ink-faint); flex-shrink: 0;
+    }
+    .panel-title-meta .meta-text {
+      font-size: var(--text-xs); color: var(--color-ink-muted);
+    }
+
+    .panel-section-label {
+      font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--color-ink-muted);
+    }
+
+    .revision-item {
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .revision-item:last-child { border-bottom: none; }
+    .revision-name { font-size: var(--text-sm); font-weight: 600; color: var(--color-ink); }
+    .revision-date { font-size: var(--text-xs); color: var(--color-ink-muted); margin-top: 2px; }
+
+    .panel-link {
+      font-size: var(--text-sm); color: var(--color-accent-text);
+      text-decoration: none; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 4px;
+      transition: opacity var(--dur-fast);
+    }
+    .panel-link:hover { opacity: .7; }
+    .panel-link svg { width: 14px; height: 14px; }
+
+    .panel-actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: auto; }
+
+    /* ═══ RESPONSIVE ═══ */
+    .mobile-toggle { display: none; background: none; border: none; color: var(--color-ink); cursor: pointer; padding: var(--space-1); border-radius: var(--radius-sm); flex-shrink: 0; }
+    .mobile-toggle:hover { background: var(--color-surface-hover); }
+    .mobile-toggle svg { width: 20px; height: 20px; }
+
+    /* Mobile info bar — visible only on small screens when right panel is hidden */
+    .mobile-info-bar {
+      display: none;
+      padding: 10px var(--space-4);
+      background: var(--color-surface);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      gap: var(--space-2);
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .mobile-info-title {
+      font-size: var(--text-sm); font-weight: 600; color: var(--color-ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1; min-width: 0;
+    }
+
+    /* Button text hide helper */
+    .btn-label { white-space: nowrap; }
+
+    /* ── 1400px: hide right panel ── */
+    @media (max-width: 1400px) {
+      .shell {
+        grid-template-columns: var(--sidebar-w) var(--prompt-panel-w) 1fr;
+        grid-template-areas: "sidebar prompt-panel topbar" "sidebar prompt-panel main";
+      }
+      #sidebar-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-collapsed-w) var(--prompt-panel-w) 1fr; }
+      #prompt-panel-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-w) 0px 1fr; }
+      #sidebar-collapse:checked ~ #prompt-panel-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-collapsed-w) 0px 1fr; }
+      .right-panel { display: none; }
+      .mobile-info-bar { display: flex; }
+    }
+
+    /* ── 1100px: hide prompt panel ── */
+    @media (max-width: 1100px) {
+      .shell {
+        grid-template-columns: var(--sidebar-w) 1fr;
+        grid-template-areas: "sidebar topbar" "sidebar main";
+      }
+      #sidebar-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-collapsed-w) 1fr; }
+      #prompt-panel-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-w) 1fr; }
+      #sidebar-collapse:checked ~ #prompt-panel-collapse:checked ~ .shell { grid-template-columns: var(--sidebar-collapsed-w) 1fr; }
+      .prompt-panel { display: none; }
+      .right-panel { display: none; }
+    }
+
+    /* ── 1024px: hide sidebar — full mobile layout ── */
+    @media (max-width: 1024px) {
+      .shell {
+        grid-template-columns: 1fr;
+        grid-template-areas: "topbar" "main";
+      }
+      .sidebar { display: none; }
+      .prompt-panel { display: none; }
+      .right-panel { display: none; }
+      .mobile-toggle { display: flex; }
+      .topbar { padding: 0 var(--space-4); gap: var(--space-3); }
+    }
+
+    /* ── 768px: tablet — compact topbar ── */
+    @media (max-width: 768px) {
+      .topbar { padding: 0 var(--space-3); gap: var(--space-2); }
+      .topbar-divider { display: none; }
+      .breadcrumbs { font-size: var(--text-xs); }
+      .breadcrumbs a:not(:last-of-type) { display: none; }
+      .breadcrumbs .sep:not(:last-of-type) { display: none; }
+      /* Hide button text labels, keep icons */
+      .topbar-actions .btn .btn-label { display: none; }
+      .topbar-actions .btn { padding: 6px 8px; }
+      .chat-scroll { padding: var(--space-5) var(--space-5); gap: var(--space-4); }
+      .chat-input-bar { padding: var(--space-3) var(--space-5) var(--space-4); }
+      .msg-user, .msg-ai { max-width: 85%; }
+      .msg-question { max-width: 90%; padding: 16px 18px; }
+      .question-title { font-size: var(--text-base); }
+    }
+
+    /* ── 480px: small mobile ── */
+    @media (max-width: 480px) {
+      .topbar { padding: 0 var(--space-3); gap: var(--space-2); min-height: 48px; }
+      /* Show only current breadcrumb */
+      .breadcrumbs a { display: none; }
+      .breadcrumbs .sep { display: none; }
+      .breadcrumbs .current { font-size: var(--text-sm); }
+      .chat-scroll { padding: var(--space-3) var(--space-3); gap: var(--space-3); }
+      .chat-input-bar { padding: var(--space-2) var(--space-3) var(--space-3); }
+      .chat-input-wrap { border-radius: var(--radius-lg); padding: 3px 3px 3px 12px; }
+      .msg-user, .msg-ai { max-width: 92%; }
+      .msg-user { padding: 10px 14px; font-size: var(--text-sm); border-radius: 16px 16px 4px 16px; }
+      .msg-ai { padding: 12px 14px; font-size: var(--text-sm); }
+      .msg-question { max-width: 100%; padding: 14px 14px; }
+      .question-label { font-size: 0.625rem; padding: 2px 6px; }
+      .question-title { font-size: var(--text-sm); margin-bottom: var(--space-3); }
+      .question-option { padding: 10px 12px; }
+      .option-label { font-size: var(--text-xs); }
+      .option-desc { font-size: 0.6875rem; }
+      .option-radio, .option-check { width: 16px; height: 16px; }
+      .mobile-info-bar { padding: 8px var(--space-3); }
+      .mobile-info-title { font-size: var(--text-xs); }
+      .msg-divider span { font-size: 0.625rem; }
+      /* Safe area for bottom input on iOS */
+      .chat-input-bar { padding-bottom: max(var(--space-3), env(safe-area-inset-bottom)); }
+    }
+  </style>
+</head>
+<body>
+  <input type="checkbox" id="sidebar-collapse">
+  <input type="checkbox" id="prompt-panel-collapse">
+  <div class="shell">
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">P</div>
+        <span class="sidebar-brand-name">Prompter</span>
+        <span class="sidebar-brand-status"></span>
+      </div>
+
+      <nav class="sidebar-section">
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Dashboard
+        </a>
+        <a href="#" class="sidebar-link active">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Prompt Requests
+          <span class="sidebar-badge">31</span>
+        </a>
+      </nav>
+
+      <nav class="sidebar-section">
+        <div class="sidebar-label">Repositories</div>
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          esnunes/prompter
+        </a>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+
+      <nav class="sidebar-section">
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Help
+        </a>
+      </nav>
+
+      <div class="sidebar-toggle-wrap">
+        <label for="sidebar-collapse" class="sidebar-toggle-btn" title="Collapse sidebar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </label>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-avatar">EN</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">Eduardo Nunes</div>
+            <div class="sidebar-user-role">Owner</div>
+          </div>
+          <div class="status-indicator"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Prompt Panel (collapsible secondary sidebar) ── -->
+    <aside class="prompt-panel">
+      <div class="prompt-panel-header">
+        <span class="prompt-panel-title">Prompts</span>
+        <label for="prompt-panel-collapse" class="prompt-panel-close" title="Collapse prompts panel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </label>
+      </div>
+      <div class="prompt-panel-search">
+        <input type="text" placeholder="Search prompts...">
+      </div>
+      <div class="prompt-list-scroll">
+        <ul class="prompt-list">
+          <li>
+            <a class="prompt-item" href="#">
+              <div class="prompt-item-title">Untitled</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                <span class="prompt-item-date">Mar 8, 2026</span>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="prompt-item" href="#">
+              <div class="prompt-item-title">Hi there! It looks like you might be testing...</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                <span class="prompt-item-date">Mar 8, 2026</span>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="prompt-item active" href="#">
+              <div class="prompt-item-title">Dashboard: show repository list instead of prompt requests</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                <span class="prompt-item-date">Mar 8, 2026</span>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="prompt-item" href="#">
+              <div class="prompt-item-title">Remove gap between left sidebar and chat</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                <span class="prompt-item-date">Mar 8, 2026</span>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="prompt-item" href="#">
+              <div class="prompt-item-title">Implement prompt versioning with diff view</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-warning"><span class="badge-dot"></span> DRAFT</span>
+                <span class="prompt-item-date">Mar 6, 2026</span>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="prompt-item" href="#">
+              <div class="prompt-item-title">Visual refresh: Catppuccin Latte theme</div>
+              <div class="prompt-item-meta">
+                <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+                <span class="prompt-item-date">Mar 9, 2026</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ── Topbar ── -->
+    <header class="topbar">
+      <button class="mobile-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <label for="prompt-panel-collapse" class="prompt-panel-toggle" title="Toggle prompts panel">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </label>
+      <div class="breadcrumbs">
+        <a href="#">Repositories</a>
+        <span class="sep"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <a href="#">esnunes/prompter</a>
+        <span class="sep"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="current">Prompt Requests</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span class="btn-label">View Issue</span>
+        </button>
+        <button class="btn btn-primary btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="btn-label">New prompt request</span>
+        </button>
+        <div class="topbar-divider"></div>
+        <div class="topbar-avatar">EN</div>
+      </div>
+    </header>
+
+    <!-- ── Main Chat Area ── -->
+    <main class="main-area">
+      <!-- Mobile info bar — shows prompt title + status when right panel is hidden -->
+      <div class="mobile-info-bar">
+        <span class="mobile-info-title">Dashboard: show repository list instead of prompt requests</span>
+        <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+      </div>
+      <div class="chat-scroll">
+        <!-- User message 1 -->
+        <div class="msg-user">the dashboard should show a list of repositories instead of conversations, the left sidebar should continue showing list of prompts</div>
+
+        <!-- AI response 1 -->
+        <div class="msg-ai">
+          <p>I've explored the codebase and understand the current structure well. The dashboard currently shows a grid of prompt request cards across all repositories, and the left sidebar shows a list of prompts. You want to replace the main dashboard content with a list of repositories instead.</p>
+          <p>I have a few questions to make sure I capture this feature correctly.</p>
+        </div>
+
+        <!-- User message 2 -->
+        <div class="msg-user">Repo details: Repository URL/name Click action: Existing repo page Repo URL form: Keep it Sidebar scope: Show all prompts</div>
+
+        <!-- AI response 2 -->
+        <div class="msg-ai">
+          <p>Thanks for the answers! The picture is getting clearer: the dashboard will show a simple list of repository names/URLs, clicking one navigates to the existing repo page, and the sidebar keeps showing all prompts.</p>
+          <p>I have a couple more questions about edge cases on the dashboard before I can write up the prompt.</p>
+        </div>
+
+        <!-- Form question — radio -->
+        <div class="msg-question">
+          <div class="question-label">Empty state</div>
+          <div class="question-title">What should be displayed when there are no repositories?</div>
+          <div class="question-options">
+            <div class="question-option selected">
+              <div class="option-radio"></div>
+              <div class="option-content">
+                <div class="option-label">Show a helpful empty state</div>
+                <div class="option-desc">Display a message with a button to add the first repository</div>
+              </div>
+            </div>
+            <div class="question-option">
+              <div class="option-radio"></div>
+              <div class="option-content">
+                <div class="option-label">Show the URL form only</div>
+                <div class="option-desc">Just display the repository URL input form</div>
+              </div>
+            </div>
+            <div class="question-option">
+              <div class="option-radio"></div>
+              <div class="option-content">
+                <div class="option-label">Redirect to setup</div>
+                <div class="option-desc">Automatically redirect to the repository setup flow</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User message 3 -->
+        <div class="msg-user">Archived toggle: Remove it Ordering: Most recent activity first</div>
+
+        <!-- AI response 3 -->
+        <div class="msg-ai">
+          <p>Great, I have all the context I need. Here's the feature request I've put together based on our conversation.</p>
+        </div>
+
+        <!-- Published divider -->
+        <div class="msg-divider">
+          <span>Published to GitHub &mdash; Revision 18 &middot; Mar 8, 2026 7:29 PM</span>
+        </div>
+      </div>
+
+      <!-- Chat input bar -->
+      <div class="chat-input-bar">
+        <div class="chat-input-wrap">
+          <textarea rows="1" placeholder="Describe the feature you'd like... (Enter to send, Shift+Enter for new line)"></textarea>
+          <button class="chat-send-btn" title="Send">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Right Panel ── -->
+    <aside class="right-panel">
+      <div class="panel-header">
+        <div class="panel-title">Dashboard: show repository list instead of prompt requests</div>
+        <div class="panel-title-meta">
+          <span class="badge badge-success"><span class="badge-dot"></span> PUBLISHED</span>
+          <span class="meta-sep"></span>
+          <span class="meta-text">14 messages</span>
+        </div>
+      </div>
+
+      <div class="panel-section-label">Revisions</div>
+
+      <div>
+        <div class="revision-item">
+          <div class="revision-name">Revision 18</div>
+          <div class="revision-date">Mar 8, 2026 7:29 PM</div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: var(--space-4);">
+        <a href="#" class="panel-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View GitHub Issue
+        </a>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-secondary btn-md" style="width: 100%; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          Archive
+        </button>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
